@@ -25,7 +25,7 @@ class VCMInstitution(Institution):
         self.num_agents = self.address_book.num_agents()
         msg_out = f"endow: {self.endowment}, group_rate: {self.group_rate}, "
         msg_out += f"num_agents: {self.num_agents}"
-        self.log_message(f'<I>: {msg_out}, target = self.short_name')
+        self.log_message(f'<I>: {msg_out}', target = self.short_name)
         self.round = 0
 
 

@@ -3,22 +3,12 @@ from mTree.microeconomic_system.institution import Institution
 from mTree.microeconomic_system.agent import Agent
 from mTree.microeconomic_system.directive_decorators import *
 from mTree.microeconomic_system.message import Message
-from dataclasses import dataclass
+
 import math
 import random
 import logging
 import time
 import datetime
-
-@dataclass
-class AgentData():
-    name: str
-    agent_type: str
-    endowment: int
-    contribution: int
-    group_earnings: float
-    private_earnings: float
-    total_earnings: float
 
 
 @directive_enabled_class
@@ -112,10 +102,12 @@ class VCMEnvironment(Environment):
         if self.round <= self.total_rounds:
              self.send_message('start_period', 'vcm_institution.VCMInstitution', self.agent_data)
         else:
+            self.log_message(f'<E> Ending in 3',target='summary_data')
             self.set_reminder('end', 3)
 
   
     @directive_decorator("end")
     def end(self, message: Message):
+        self.log_message(f'<E> Shutdown', target='summary_data')
         self.shutdown_mes()
 
