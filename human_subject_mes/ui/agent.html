@@ -1,0 +1,335 @@
+<html>
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td {
+            height: 3vw;
+            width: 3vw;
+            /* display: inline-block; */
+        }
+
+    </style>
+      <script>
+
+        class MTreeUIManager {
+            constructor() {
+                console.log("Initializing manager");
+            
+                this.message = "none";
+                this.total_earnings = "none";
+                this.period = "none";
+                this.group_rate = "none";
+                this.savings_rate = "none";
+                this.time_left = "none";
+                this.num_participants = "none";
+                this.total_contribution = "none";
+                this.savings = "none";
+                this.endowment = "none";
+                this.message = "none";
+                this.message = "none";
+
+                this.beginning_cash = 0;
+
+
+                this.return_on_group = 0;
+                this.return_on_savings = 0;
+                this.period_earnings = 0;
+
+                this.previous_period = "None";
+                this.prev_group_return = "None";
+                this.prev_savings_return = "None";
+                this.previous_period_earnings = "None";
+
+                
+                // this.prepare_actions();
+                this.prepare_outlets();
+                this.enable_contribute_buttons();
+            }
+
+            prepare_actions(){
+                $('[data-action-method]').each((item, element) => {
+                    console.log("Registering action");
+                    var target_action = element.getAttribute("data-action-method");
+                    var target_action_method = this[target_action];
+                    
+
+                    $(element).click((event) => {
+                        var target_action = event.currentTarget.getAttribute("data-action-method");
+                        var target_action_method = this[target_action];
+                        this[target_action]();
+
+                    }            
+                );
+                });
+            }
+
+            enable_contribution_buttons(){
+                $("#group-investment").val(0);
+                $("#submit-group-investment").prop("disabled", false);
+                $("#group-investment").prop("disabled", false);
+            }
+
+            disable_contribution_buttons(){
+                $("#submit-group-investment").prop("disabled", true);
+                $("#group-investment").prop("disabled", true);
+            }
+
+            update_property(property_name, property_value){
+                console.log("Property? " + property_name);
+                this[property_name] = property_value;
+            }
+
+            refresh_property(property_name, outlet_value, new_value){
+                
+                
+                Object.defineProperty(this, outlet_value, 
+                    {set: (new_val) => {
+                            $("#" + element_id).html(new_val);
+                            delete this[property_name];
+                            this[property_name] = new_val;
+                            // this.set(outlet_value, new_val); 
+                        }
+                    });
+
+            }
+
+            property_setter_hook(element_id, outlet_value, new_val){
+                $("#" + element_id).html(new_val);
+                delete this[outlet_value];
+                this[outlet_value] = new_val;
+                // this.set(outlet_value, new_val); 
+                Object.defineProperty(this, outlet_value, 
+                    {
+                        get: () => { return new_val},
+                        set: (new_val) => this.property_setter_hook(element_id, outlet_value, new_val)
+                    });
+            }
+
+
+            prepare_outlets(){
+                this.outlet_maps = {};
+                $('[data-outlet-value]').each((item, element) => {
+                    // console.log(item)
+                    // console.log(this);
+                    // console.log(item);
+                    
+                    var element_id = element.id;
+                    var outlet_value = element.getAttribute("data-outlet-value");
+
+                    this.outlet_maps[outlet_value] = [this[outlet_value], element_id];
+
+                    if (this[outlet_value] != null){
+                        $("#" + element_id).html(this[outlet_value]);
+                    }
+                    var start_value = this[outlet_value];
+                    // this.refresh_property(outlet_value, element_id);
+                    Object.defineProperty(this, outlet_value, 
+                    {
+                        get: () => { return start_value},
+                        set: (new_val) => this.property_setter_hook(element_id, outlet_value, new_val)
+                    });
+
+            });
+            }
+
+
+            enable_contribute_buttons(){
+                    $('#submit-group-investment').click((event) => {
+                        console.log("Submitting Contribution!");
+                        var submit_contribution = {"subject_id": window.subject_id, 
+                                            "action": "submit_contribution", 
+                                            "contribution": $("#group-investment").val()
+                                        };
+                        window.mTree_subject_connection.send_agent_action(submit_contribution)
+                    });
+                }
+
+            update_history(){
+                $("#history-table").append("Trade history");
+            }
+
+            display_contribution_history(payload){
+                console.log("Should be displaying contribution history");
+                let data = payload.data;
+                console.log(data);
+                for (let datarow in data){
+                    console.log(data[datarow]);
+                    var new_row = "<tr><td>" + data[datarow].period + "</td><td>" + data[datarow].investment + "</td><td>" + + data[datarow].total + "</td><td>" + data[datarow].num_investors + "</td><td>" + data[datarow].earnings + "</td></tr>";
+                    $('#history-table > tbody:last-child').append(new_row);     
+                }
+                
+            }
+    
+
+        }
+
+    // Prepare the UI Manager...
+    $( document ).ready(function() {
+        console.log("UI Preparing...");
+        //   window.ui_manager_full = new MTreeUIManager();
+      window.ui_manager = new MTreeUIManager();
+
+   
+
+
+    });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        Messages
+                    </div>
+                    <div class="card-body">
+                        <span class="outlet" id="message" data-outlet-value="message"></span> 
+    
+                    </div>
+                  </div>
+            </div>
+
+        </div>
+
+
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            Information
+                        </div>
+                        <div class="card-body">
+                            ID: <span class="outlet" id="id" data-outlet-value="id"></span>
+                            <br>
+                            Period: <span class="outlet" id="period" data-outlet-value="period"></span>
+                            <br>
+                            Total Earnings: <span class="outlet" id="total_earnings" data-outlet-value="total_earnings"></span>
+                            <br>
+    
+            
+                        </div>
+                      </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header">
+                        Previous Round Results
+                    </div>
+                    <div class="card-body">
+                        Results for previous period: <span class="outlet" id="previous_period" data-outlet-value="previous_period"></span>
+                        <br>
+                        Returns on group investment: <span class="outlet" id="prev_group_return" data-outlet-value="prev_group_return"></span>
+                        <br>
+                        Returns on savings: <span class="outlet" id="prev_savings_return" data-outlet-value="prev_savings_return"></span>
+                        <br>
+                        Period Earnings: <span class="outlet" id="previous_period_earnings" data-outlet-value="previous_period_earnings"></span>
+                        <br>
+        
+        
+                    </div>
+                  </div>
+
+
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <div class="card-header">
+                        Decision
+                    </div>
+                    <div class="card-body">
+                        
+                Beginning Cash: <span class="outlet" id="beginning_cash" data-outlet-value="beginning_cash"></span>
+                <br>
+                
+                Rate of Return on Group Investment: <span class="outlet" id="group_rate" data-outlet-value="group_rate"></span>
+                <br>
+                
+                Rate of Return on Savings: <span class="outlet" id="savings_rate" data-outlet-value="savings_rate"></span>
+                <br>
+
+                Number of Participants: <span class="outlet" id="num_participants" data-outlet-value="num_participants"></span>
+                <br>
+
+                Time left: <span class="outlet" id="time_left" data-outlet-value="time_left"></span>
+                <br>
+
+                Total invested so far: <span class="outlet" id="total_contribution" data-outlet-value="total_contribution"></span>
+                <br>
+                Enter Your Group Investment: <input type="number" class="form-control order-entry order-entry-value numeric" id="group-investment"  min="0" max="100" disabled>
+                <br>
+                Savings: <span class="outlet" id="savings" data-outlet-value="savings"></span>
+                <br>
+                <button id="submit-group-investment" disabled>Submit Contribution</button>
+
+        
+                    </div>
+                  </div>
+
+                
+
+            </div>
+            <div class="col">
+                
+                <div class="card h-100">
+                    <div class="card-header">
+                        History
+                    </div>
+                    <div class="card-body">
+                        <table class="table" id="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Period</th>
+                                    <th>Investment</th>
+                                    <th>Total</th>
+                                    <th># Investors</th>
+                                    <th>Earnings</th>
+                                </tr>    
+                            </thead>
+                            <tbody>
+        
+                            </tbody>
+                        </table>
+        
+                    </div>
+                  </div>
+
+
+            </div>
+
+        </div>
+    
+    
+    </div>
+
+<script>
+    $( "#group-investment" ).keydown((e) => {
+        let new_value = e.originalEvent.key;
+        var charCode = e.originalEvent.keyCode || e.which;
+       
+        if (charCode == 8 || charCode == 46 || charCode == 37 || charCode == 38 || charCode == 39 || charCode == 40){
+            return true;
+        }
+        if (new_value >= 0 && new_value <= 9){
+            let num = new_value;
+            let text = num.toString();
+            var final_value = $( "#group-investment" ).val() + text;
+            var potential_new_value = parseInt(final_value);
+            if (final_value >= 0 && final_value <= 100){
+                return true;
+            }
+        }
+
+        return false;
+    });
+</script>
+
+</body>
+</html>
+                  

@@ -1,0 +1,33 @@
+{
+    "mtree_type": "mes_subject_experiment",
+    "name": "TEST Human Subject VCM",
+    "id": "1",
+    "environment": "vcm_environment.VCMEnvironment",
+    "institutions": [
+        {
+            "institution_name": "vcm_institution.VCMInstitution"
+        }
+    ],
+    "number_of_runs": 1,
+    "agents": [
+        {
+            "agent_name": "vcm_human_agent.VCMHumanAgent",
+            "min_subjecys": 2
+        }
+    ],
+    "properties": {
+        "endowment": 100,
+        "group_rate": 1.5,
+        "savings_rate": 1.0,
+        "num_participants":18,
+        "num_cooperators": 6,
+        "num_defectors": 6,
+        "num_conditional_cooperators":6,
+        "start_cc": 50,
+        "total_rounds": 2,
+        "period_length": 90,
+        "agent_period_adjustment": 2
+        
+    },
+    "data_logging": false
+}
