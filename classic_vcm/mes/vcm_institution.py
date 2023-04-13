@@ -36,8 +36,8 @@ class VCMInstitution(Institution):
         self.log_message(log_it, target = self.short_name)
         self.agent_data = message.get_payload()
         self.num_contributions_received = 0
-        for agent in self.agent_data:
-            self.send_message('contribute', agent, self.round)
+        for agent_name in self.agent_data:
+            self.send_message('contribute', agent_name, self.round)
 
 
     @directive_decorator("contribution")
